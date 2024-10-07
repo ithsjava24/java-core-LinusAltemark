@@ -2,89 +2,88 @@ package org.example.warehouse;
 
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 public class Warehouse {
-
-    private String name;
-    private Map<UUID, ProductRecord> products = new ConcurrentHashMap<>();
-    private Set<ProductRecord> changedProducts = new HashSet<>();
-
     private static final Map<String, Warehouse> instances = new HashMap<>();
+    private final String name;
+    private final List<ProductRecord> products = new ArrayList<>();
+    private final Set<ProductRecord> changedProducts = new HashSet<>();
 
     private Warehouse(String name) {
         this.name = name;
-        clearProducts();
     }
 
     public static Warehouse getInstance() {
-        return getInstance("Warehouse");
+        return getInstance("DefaultWarehouse");
     }
 
     public static Warehouse getInstance(String name) {
         return instances.computeIfAbsent(name, Warehouse::new);
     }
 
-    // Kontrollerar ifall lagret är tomt
-    public boolean isEmpty(){
+    // Lägger till en produkt i lagret
+    public ProductRecord addProduct(UUID uuid, String productName, Category category, BigDecimal price) {
+        if (productName == null || productName.isEmpty()) {
+            throw new IllegalArgumentException("Product name can't be null or empty.");
+        }
+        if (category == null) {
+            throw new IllegalArgumentException("Category can't be null.");
+        }
+        if (uuid == null) {
+            uuid = UUID.randomUUID();
+        }
+        if (price == null) {
+            price = BigDecimal.ZERO;
+        }
+
+        for (ProductRecord product : products) {
+            if (product.uuid().equals(uuid)) {
+                throw new IllegalArgumentException("Product with that id already exists, use updateProduct for updates.");
+            }
+        }
+
+        ProductRecord newProduct = new ProductRecord(uuid, productName, category, price);
+        products.add(newProduct);
+        return newProduct;
+    }
+
+    public List<ProductRecord> getProducts() {
+        return Collections.unmodifiableList(products);
+    }
+
+    public boolean isEmpty() {
         return products.isEmpty();
     }
 
-    // Hämtar alla produkter
-    public List<ProductRecord> getProducts() {
-        return Collections.unmodifiableList(new ArrayList<>(products.values()));
+    public Optional<ProductRecord> getProductById(UUID id) {
+        return products.stream()
+                .filter(product -> product.uuid().equals(id))
+                .findFirst();
     }
 
-    // Lägg till en produkt
-    public ProductRecord addProduct(UUID uuid, String name, Category category, BigDecimal price){
-        if (uuid != null && products.containsKey(uuid)){
-            throw new IllegalArgumentException("Product with that id already exists, use updateProduct for updates.");
-        }
-
-        ProductRecord product = new ProductRecord(uuid, name, category, price);
-        products.put(product.uuid(), product);
-        return product;
+    public void updateProductPrice(UUID id, BigDecimal newPrice) {
+        var product = getProductById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Product with that id doesn't exist."));
+        changedProducts.add(product);
+        products.remove(product);
+        products.add(new ProductRecord(product.uuid(), product.name(), product.category(), newPrice));
     }
 
-    // Hämta produkt med ID
-    public Optional<ProductRecord> getProductById(UUID uuid){
-        return Optional.ofNullable(products.get(uuid));
-    }
-
-    // Uppdaterar priset för produkt
-    public void updateProductPrice(UUID uuid, BigDecimal newPrice){
-        ProductRecord product = products.get(uuid);
-
-        if (product == null){
-            throw new IllegalArgumentException("Product with that id doesn't exist.");
-        }
-
-        ProductRecord updatedProduct = new ProductRecord(product.uuid(), product.name(), product.category(), newPrice);
-        products.put(uuid, updatedProduct);
-        changedProducts.add(updatedProduct);
-    }
-
-    // Hämta ändrade produkter
     public Set<ProductRecord> getChangedProducts() {
-        return Collections.unmodifiableSet(changedProducts);
+        return changedProducts;
     }
 
-    // Grupperar produkterna efter kategorier
-    public Map<Category, List<ProductRecord>> getProductsGroupedByCategories() {
-        return products.values().stream()
-                .collect(Collectors.groupingBy(ProductRecord::category));
-    }
-
-    // Hämta produkt från specifik kategori
     public List<ProductRecord> getProductsBy(Category category) {
-        return products.values().stream()
+        return products.stream()
                 .filter(product -> product.category().equals(category))
-                .collect(Collectors.toList());
+                .toList();
     }
 
-    public void clearProducts() {
-        products.clear();
-        changedProducts.clear();
+    public Map<Category, List<ProductRecord>> getProductsGroupedByCategories() {
+        Map<Category, List<ProductRecord>> groupedProducts = new HashMap<>();
+        for (ProductRecord product : products) {
+            groupedProducts.computeIfAbsent(product.category(), k -> new ArrayList<>()).add(product);
+        }
+        return groupedProducts;
     }
 }
