@@ -15,7 +15,7 @@ public class Category {
 
     public static Category of (String name) {
         if (name == null) {
-            throw new IllegalArgumentException("Category name cannot be null");
+            throw new IllegalArgumentException("Category name can't be null");
         }
 
         // Ser till att första bokstaven i namnet är Stor

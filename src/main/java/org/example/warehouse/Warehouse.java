@@ -34,4 +34,51 @@ public class Warehouse {
     public List<ProductRecord> getProducts() {
         return Collections.unmodifiableList(new ArrayList<>(products.values()));
     }
+
+    // Lägg till en produkt
+    public ProductRecord addProduct(UUID uuid, String name, Category category, BigDecimal price){
+        if (uuid != null && products.containsKey(uuid)){
+            throw new IllegalArgumentException("Product with that ID already exists");
+        }
+
+        ProductRecord product = new ProductRecord(uuid, name, category, price);
+        products.put(product.uuid(), product);
+        return product;
+    }
+
+    // Hämta produkt med ID
+    public Optional<ProductRecord> getProductById(UUID uuid){
+        return Optional.ofNullable(products.get(uuid));
+    }
+
+    // Uppdaterar priset för produkt
+    public void updateProductPrice(UUID uuid, BigDecimal newPrice){
+        ProductRecord product = products.get(uuid);
+
+        if (product == null){
+            throw new IllegalArgumentException("Product with that ID does not exist");
+        }
+
+        ProductRecord updatedProduct = new ProductRecord(product.uuid(), product.name(), product.category(), newPrice);
+        products.put(uuid, updatedProduct);
+        changedProducts.add(updatedProduct);
+    }
+
+    // Hämta ändrade produkter
+    public Set<ProductRecord> getChangedProducts() {
+        return Collections.unmodifiableSet(changedProducts);
+    }
+
+    // Grupperar produkterna efter kategorier
+    public Map<Category, List<ProductRecord>> getProductsGroupedByCategories() {
+        return products.values().stream()
+                .collect(Collectors.groupingBy(ProductRecord::category));
+    }
+
+    // Hämta produkt från specifik kategori
+    public List<ProductRecord> getProductsBy(Category category) {
+        return products.values().stream()
+                .filter(product -> product.category().equals(category))
+                .collect(Collectors.toList());
+    }
 }
