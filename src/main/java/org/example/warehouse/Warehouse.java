@@ -15,6 +15,7 @@ public class Warehouse {
 
     private Warehouse(String name) {
         this.name = name;
+        clearProducts();
     }
 
     public static Warehouse getInstance() {
@@ -38,7 +39,7 @@ public class Warehouse {
     // Lägg till en produkt
     public ProductRecord addProduct(UUID uuid, String name, Category category, BigDecimal price){
         if (uuid != null && products.containsKey(uuid)){
-            throw new IllegalArgumentException("Product with that ID already exists");
+            throw new IllegalArgumentException("Product with that id already exists, use updateProduct for updates.");
         }
 
         ProductRecord product = new ProductRecord(uuid, name, category, price);
@@ -56,7 +57,7 @@ public class Warehouse {
         ProductRecord product = products.get(uuid);
 
         if (product == null){
-            throw new IllegalArgumentException("Product with that ID does not exist");
+            throw new IllegalArgumentException("Product with that id doesn't exist.");
         }
 
         ProductRecord updatedProduct = new ProductRecord(product.uuid(), product.name(), product.category(), newPrice);
@@ -80,5 +81,10 @@ public class Warehouse {
         return products.values().stream()
                 .filter(product -> product.category().equals(category))
                 .collect(Collectors.toList());
+    }
+
+    public void clearProducts() {
+        products.clear();
+        changedProducts.clear();
     }
 }
