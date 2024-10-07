@@ -13,6 +13,7 @@ public record ProductRecord(UUID uuid, String name, Category category, BigDecima
             throw new IllegalArgumentException("Category cannot be null");
         }
 
+        // Om priset är null så ska det sättas till 0
         this.uuid = uuid != null ? uuid : UUID.randomUUID();
         this.name = name;
         this.category = category;

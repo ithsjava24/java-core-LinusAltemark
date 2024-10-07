@@ -18,11 +18,15 @@ public class Category {
             throw new IllegalArgumentException("Category name cannot be null");
         }
 
+        // Ser till att första bokstaven i namnet är Stor
         String formattedName = capitalizeFirstLetter(name);
 
-        return cache.computeIfAbsent(name, Category::new);
+        // Kollar ifall kateogrin redan existerar i cachen.
+        // Om inte så skapas det en ny kategori som läggs till i cachen
+        return cache.computeIfAbsent(formattedName, Category::new);
     }
 
+    // En Helper-metod som används för att göra första bokstaven stor
     private static String capitalizeFirstLetter(String name) {
         if (name.isEmpty()) {
             return name;
