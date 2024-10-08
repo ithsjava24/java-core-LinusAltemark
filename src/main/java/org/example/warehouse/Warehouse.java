@@ -6,15 +6,15 @@ import java.util.*;
 public class Warehouse {
     private static final Map<String, Warehouse> instances = new HashMap<>();
     private final String name;
-    private final List<ProductRecord> products = new ArrayList<>();
-    private final Set<ProductRecord> changedProducts = new HashSet<>();
+    private final List<Product> products = new ArrayList<>();
+    private final Set<Product> changedProducts = new HashSet<>();
 
     private Warehouse(String name) {
         this.name = name;
     }
 
     public static Warehouse getInstance() {
-        return getInstance("DefaultWarehouse");
+        return new Warehouse("");
     }
 
     public static Warehouse getInstance(String name) {
@@ -22,7 +22,7 @@ public class Warehouse {
     }
 
     // Lägger till en produkt i lagret
-    public ProductRecord addProduct(UUID uuid, String productName, Category category, BigDecimal price) {
+    public Product addProduct(UUID uuid, String productName, Category category, BigDecimal price) {
         if (productName == null || productName.isEmpty()) {
             throw new IllegalArgumentException("Product name can't be null or empty.");
         }
@@ -36,18 +36,18 @@ public class Warehouse {
             price = BigDecimal.ZERO;
         }
 
-        for (ProductRecord product : products) {
+        for (Product product : products) {
             if (product.uuid().equals(uuid)) {
                 throw new IllegalArgumentException("Product with that id already exists, use updateProduct for updates.");
             }
         }
 
-        ProductRecord newProduct = new ProductRecord(uuid, productName, category, price);
+        Product newProduct = new Product(uuid, productName, category, price);
         products.add(newProduct);
         return newProduct;
     }
 
-    public List<ProductRecord> getProducts() {
+    public List<Product> getProducts() {
         return Collections.unmodifiableList(products);
     }
 
@@ -55,7 +55,7 @@ public class Warehouse {
         return products.isEmpty();
     }
 
-    public Optional<ProductRecord> getProductById(UUID id) {
+    public Optional<Product> getProductById(UUID id) {
         return products.stream()
                 .filter(product -> product.uuid().equals(id))
                 .findFirst();
@@ -66,22 +66,22 @@ public class Warehouse {
                 .orElseThrow(() -> new IllegalArgumentException("Product with that id doesn't exist."));
         changedProducts.add(product);
         products.remove(product);
-        products.add(new ProductRecord(product.uuid(), product.name(), product.category(), newPrice));
+        products.add(new Product(product.uuid(), product.name(), product.category(), newPrice));
     }
 
-    public Set<ProductRecord> getChangedProducts() {
+    public Set<Product> getChangedProducts() {
         return changedProducts;
     }
 
-    public List<ProductRecord> getProductsBy(Category category) {
+    public List<Product> getProductsBy(Category category) {
         return products.stream()
                 .filter(product -> product.category().equals(category))
                 .toList();
     }
 
-    public Map<Category, List<ProductRecord>> getProductsGroupedByCategories() {
-        Map<Category, List<ProductRecord>> groupedProducts = new HashMap<>();
-        for (ProductRecord product : products) {
+    public Map<Category, List<Product>> getProductsGroupedByCategories() {
+        Map<Category, List<Product>> groupedProducts = new HashMap<>();
+        for (Product product : products) {
             groupedProducts.computeIfAbsent(product.category(), k -> new ArrayList<>()).add(product);
         }
         return groupedProducts;
