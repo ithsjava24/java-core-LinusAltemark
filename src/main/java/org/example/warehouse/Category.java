@@ -24,7 +24,6 @@ public class Category {
         return name;
     }
 
-    // Hjälpmetod för att göra första bokstaven stor
     private static String capitalize(String name) {
         if (name == null || name.isEmpty()) {
             throw new IllegalArgumentException("Category name can't be null");

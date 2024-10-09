@@ -21,7 +21,6 @@ public class Warehouse {
         return instances.computeIfAbsent(name, Warehouse::new);
     }
 
-    // Lägger till en produkt i lagret
     public Product addProduct(UUID uuid, String productName, Category category, BigDecimal price) {
         if (productName == null || productName.isEmpty()) {
             throw new IllegalArgumentException("Product name can't be null or empty.");
