@@ -1,7 +1,7 @@
 package org.example;
 
 import org.example.warehouse.Category;
-import org.example.warehouse.ProductRecord;
+import org.example.warehouse.Product;
 import org.example.warehouse.Warehouse;
 import org.junit.jupiter.api.*;
 
@@ -92,7 +92,7 @@ class WarehouseTest {
     @DisplayName("adding one product")
     class AfterAddingProduct {
 
-        ProductRecord addedProduct;
+        Product addedProduct;
         String UUID_name = "5fc03087-d265-11e7-b8c6-83e29cd24f4c";
         UUID UUID_milk;
 
@@ -181,7 +181,7 @@ class WarehouseTest {
     @Nested
     @DisplayName("after adding multiple products")
     class AfterAddingMultipleProducts {
-        List<ProductRecord> addedProducts = new ArrayList<>();
+        List<Product> addedProducts = new ArrayList<>();
         String UUID_name = "5fc03087-d265-11e7-b8c6-83e29cd24f4c";
 
         @BeforeEach
@@ -223,7 +223,7 @@ class WarehouseTest {
         @Test
         @DisplayName("group them by category")
         void getAMapWithAllProductsForEachCategory() {
-            Map<Category, List<ProductRecord>> productsOfCategories =
+            Map<Category, List<Product>> productsOfCategories =
                     Map.of(addedProducts.get(0).category(), List.of(addedProducts.get(0)),
                             addedProducts.get(1).category(), List.of(addedProducts.get(1)),
                             addedProducts.get(2).category(), List.of(addedProducts.get(2)));
